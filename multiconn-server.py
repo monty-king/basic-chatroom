@@ -41,8 +41,8 @@ def service_connection(key, mask):
 
 # main program: set up the host address and port; change them if you need to
 
-host = '0.0.0.0'  # listens to any available IP address.  You might want to use 0.0.0.0 for the real internet
-port = 12358      # fibonacci numbers are cool;  irrelevant to this program, but still cool
+host = '0.0.0.0'
+port = 31337
 
 # set up the listening socket and register it with the SELECT mechanism
 
