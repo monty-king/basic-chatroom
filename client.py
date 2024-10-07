@@ -11,6 +11,7 @@ messages = [b"Message 1 from client.", b"Message 2 from client."]
 
 def start_connections(host, port, num_conns):
     server_addr = (host, port)
+    print(server_addr)
     for i in range(0, num_conns):
         connid = i + 1
         print("starting connection", connid, "to", server_addr)
@@ -53,8 +54,13 @@ def service_connection(key, mask):
 
 # main program
 
-host = '0.0.0.0'   # localhost; use 0.0.0.0 if you want to communicate across machines in a real network
-port = 31337         # I just love fibonacci numbers
+if (len(sys.argv) == 3):
+    host = sys.argv[1]
+    port = sys.argv[2] 
+else:
+    print("Usage: ./client.py HOST PORT")
+    sys.exit(5)
+
 num_conns = 2       # you can change this to however many clients you want to create
 
 
