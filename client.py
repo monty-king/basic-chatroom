@@ -56,7 +56,7 @@ def service_connection(key, mask):
 
 if (len(sys.argv) == 3):
     host = sys.argv[1]
-    port = sys.argv[2] 
+    port = int(sys.argv[2])
 else:
     print("Usage: ./client.py HOST PORT")
     sys.exit(5)
