@@ -92,8 +92,13 @@ class Message:
                 content = {"result": f"Username '{username}' registerd successfully "}
             else:
                 content = {"result": f"Error: null username registerd from {self.addr}"}
+        elif action == "message":
+            message = self.request.get("value")
+            print(f"Received message: {message}")
+            content = {"result": f"Message received: {message}"}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
+        
         content_encoding = "utf-8"
         response = {
             "content_bytes": self._json_encode(content, content_encoding),
@@ -137,6 +142,11 @@ class Message:
                 self.create_response()
 
         self._write()
+
+        # after writing message, enter read mode to receive new message
+        if not self._send_buffer:
+            if self.sock:
+                self._set_selector_events_mask("r")
 
     def close(self):
         print("closing connection to", self.addr)
