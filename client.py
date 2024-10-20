@@ -9,8 +9,10 @@ import libclient
 
 sel = selectors.DefaultSelector()
 
+handle = None
+
 def create_request(action, value):
-    if action == "search":
+    if action == "register":
         return dict(
             type="text/json",
             encoding="utf-8",
@@ -33,13 +35,18 @@ def start_connection(host, port, request):
     message = libclient.Message(sel, sock, addr, request)
     sel.register(sock, events, data=message)
 
-if len(sys.argv) != 5:
-    print("usage:", sys.argv[0], "<host> <port> <action> <value>")
+if len(sys.argv) != 3:
+    print("usage:", sys.argv[0], "<host> <port>")
     sys.exit(1)
 
 host, port = sys.argv[1], int(sys.argv[2])
-action, value = sys.argv[3], sys.argv[4]
-request = create_request(action, value)
+# action, value = sys.argv[3], sys.argv[4]
+if handle is None: # the username hasn't been set
+    handle = input("Please set a username: ")
+else:
+    print(f"Username set to: {handle}")
+
+request = create_request("register", handle) # register username
 start_connection(host, port, request)
 
 try:

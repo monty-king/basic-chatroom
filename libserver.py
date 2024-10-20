@@ -4,17 +4,12 @@ import json
 import io
 import struct
 
-request_search = {
-    "morpheus": "Follow the white rabbit. \U0001f430",
-    "ring": "In the caves beneath the Misty Mountains. \U0001f48d",
-    "\U0001f436": "\U0001f43e Playing ball! \U0001f3d0",
-}
-
 class Message:
     def __init__(self, selector, sock, addr):
         self.selector = selector
         self.sock = sock
         self.addr = addr
+        self.username = None
         self._recv_buffer = b""
         self._send_buffer = b""
         self._jsonheader_len = None
@@ -89,10 +84,14 @@ class Message:
 
     def _create_response_json_content(self):
         action = self.request.get("action")
-        if action == "search":
-            query = self.request.get("value")
-            answer = request_search.get(query) or f'No match for "{query}".'
-            content = {"result": answer}
+        if action == "register":
+            username = self.request.get("value")
+            if username:
+                self.username = username
+                print(f"User '{username}' registered from {self.addr}")
+                content = {"result": f"Username '{username}' registerd successfully "}
+            else:
+                content = {"result": f"Error: null username registerd from {self.addr}"}
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         content_encoding = "utf-8"
