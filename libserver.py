@@ -1,4 +1,3 @@
-
 import sys
 import selectors
 import json
@@ -10,7 +9,6 @@ request_search = {
     "ring": "In the caves beneath the Misty Mountains. \U0001f48d",
     "\U0001f436": "\U0001f43e Playing ball! \U0001f3d0",
 }
-
 
 class Message:
     def __init__(self, selector, sock, addr):
@@ -95,21 +93,6 @@ class Message:
             query = self.request.get("value")
             answer = request_search.get(query) or f'No match for "{query}".'
             content = {"result": answer}
-
-        elif action == "double":
-            query = self.request.get("value")
-            number = float(query)
-            doubled = number * 2
-            answer = request_search.get(doubled) or f'No match for "{query}".'
-            content = {"result": answer}
-
-        elif action == "negate":
-            query = self.request.get("value")
-            number = float(query)
-            negated = -1 * number
-            answer = request_search.get(negated) or f'No match for "{query}".'
-            content = {"result": answer}
-        
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         content_encoding = "utf-8"

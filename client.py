@@ -1,4 +1,3 @@
-
 #!/usr/bin/env python3
 
 import sys
@@ -10,7 +9,6 @@ import libclient
 
 sel = selectors.DefaultSelector()
 
-
 def create_request(action, value):
     if action == "search":
         return dict(
@@ -18,25 +16,12 @@ def create_request(action, value):
             encoding="utf-8",
             content=dict(action=action, value=value),
         )
-    elif action == "double":
-        return dict(
-            type="binary/custom-client-binary-type",
-            encoding="binary",
-            content=bytes(action + value, encoding="utf-8"),
-        )
-    elif action == "negate":
-        return dict(
-            type="binary/custom-client-binary-type",
-            encoding="binary",
-            content=bytes(action + value, encoding="utf-8"),
-        )
     else:
         return dict(
             type="binary/custom-client-binary-type",
             encoding="binary",
             content=bytes(action + value, encoding="utf-8"),
         )
-
 
 def start_connection(host, port, request):
     addr = (host, port)
@@ -47,7 +32,6 @@ def start_connection(host, port, request):
     events = selectors.EVENT_READ | selectors.EVENT_WRITE
     message = libclient.Message(sel, sock, addr, request)
     sel.register(sock, events, data=message)
-
 
 if len(sys.argv) != 5:
     print("usage:", sys.argv[0], "<host> <port> <action> <value>")
