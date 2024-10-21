@@ -1,59 +1,31 @@
-# multiconn-server.py: a multi-connection ECHO server using the SELECT mechanism
+#!/usr/bin/env python3
 
 import sys
 import socket
 import selectors
-import types
+import traceback
+
+import libserver
 
 sel = selectors.DefaultSelector()
-
-# this routine is called when the LISTENING SOCKET gets a
-# connection request from a new client
 
 def accept_wrapper(sock):
     conn, addr = sock.accept()  # Should be ready to read
     print("accepted connection from", addr)
     conn.setblocking(False)
-    data = types.SimpleNamespace(addr=addr, inb=b"", outb=b"")
-    events = selectors.EVENT_READ | selectors.EVENT_WRITE
-    sel.register(conn, events, data=data)
+    message = libserver.Message(sel, conn, addr)
+    sel.register(conn, selectors.EVENT_READ, data=message)
 
-
-# this routine is called when a client is ready to read or write data
-
-def service_connection(key, mask):
-    sock = key.fileobj
-    data = key.data
-    if mask & selectors.EVENT_READ:
-        recv_data = sock.recv(1024)  # Should be ready to read
-        if recv_data:
-            data.outb += recv_data
-        else:
-            print("closing connection to", data.addr)
-            sel.unregister(sock)
-            sock.close()
-    if mask & selectors.EVENT_WRITE:
-        if data.outb:
-            print("echoing", repr(data.outb), "to", data.addr)
-            sent = sock.send(data.outb)  # Should be ready to write
-            data.outb = data.outb[sent:]
-
-
-# main program: set up the host address and port; change them if you need to
-
-host = '0.0.0.0'
-port = 31337
-
-# set up the listening socket and register it with the SELECT mechanism
-
+host, port = "0.0.0.0", 31337
 lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+# Avoid bind() exception: OSError: [Errno 48] Address already in use
+lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
 lsock.bind((host, port))
 lsock.listen()
 print("listening on", (host, port))
 lsock.setblocking(False)
 sel.register(lsock, selectors.EVENT_READ, data=None)
 
-# the main event loop
 try:
     while True:
         events = sel.select(timeout=None)
@@ -61,7 +33,15 @@ try:
             if key.data is None:
                 accept_wrapper(key.fileobj)
             else:
-                service_connection(key, mask)
+                message = key.data
+                try:
+                    message.process_events(mask)
+                except Exception:
+                    print(
+                        "main: error: exception for",
+                        f"{message.addr}:\n{traceback.format_exc()}",
+                    )
+                    message.close()
 except KeyboardInterrupt:
     print("caught keyboard interrupt, exiting")
 finally:
