@@ -47,6 +47,7 @@ if handle is None: # the username hasn't been set
 
 request = create_request("register", handle) # register username
 start_connection(host, port, request)
+print("Use 'exit' at any time to quit")
 
 try:
     while True:
