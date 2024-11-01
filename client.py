@@ -10,6 +10,7 @@ import libclient
 sel = selectors.DefaultSelector()
 
 handle = None
+handle_2 = None
 
 def create_request(action, value):
     if action in ["register", "message"]:
@@ -46,8 +47,15 @@ if handle is None: # the username hasn't been set
     handle = input("Please set a username: ")
 
 request = create_request("register", handle) # register username
-start_connection(host, port, request)
-print("Use 'exit' at any time to quit")
+
+print("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
+if handle_2 is None:
+    handle_2 = input("'join' or 'exit'")
+if handle_2 == 'join':
+    start_connection(host, port, request)
+    print("Use 'exit' at any time to quit")
+#if handle_2 == 'exit':
+#    handle = 'exit'
 
 try:
     while True:
