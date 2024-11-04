@@ -10,13 +10,12 @@ import libserver
 sel = selectors.DefaultSelector()
 
 class Server:
-
     def __init__(self, host, port):
-
-        self.clients = []
         self.host = host
         self.port = port
+        self.clients = []
 
+    def run(self):
         lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         # Avoid bind() exception: OSError: [Errno 48] Address already in use
         lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
