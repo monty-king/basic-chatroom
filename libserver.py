@@ -4,6 +4,8 @@ import json
 import io
 import struct
 
+clients = {}
+
 class Message:
     def __init__(self, selector, sock, addr):
         self.selector = selector
@@ -16,6 +18,7 @@ class Message:
         self.jsonheader = None
         self.request = None
         self.response_created = False
+        self.clients = []
 
     def _set_selector_events_mask(self, mode):
         """Set selector to listen for events: mode is 'r', 'w', or 'rw'."""
@@ -83,15 +86,23 @@ class Message:
         return message
 
     def _create_response_json_content(self):
+        global clients
+
         action = self.request.get("action")
         if action == "register":
             username = self.request.get("value")
+
             if username:
-                self.username = username
-                print(f"User '{username}' registered from {self.addr}")
-                content = {"result": f"Username '{username}' registerd successfully "}
+                if username in clients:
+                    content = {"result": f"Error: username already taken!  Please choose a different one."}
+                else:
+                    self.username = username
+                    clients[username] = self
+                    print(f"User '{username}' registered from {self.addr}")
+                    content = {"result": f"Username '{username}' registerd successfully "}
             else:
                 content = {"result": f"Error: null username registerd from {self.addr}"}
+       
         elif action == "message":
             message = self.request.get("value")
             print(f"Received message: {message}")
@@ -149,6 +160,12 @@ class Message:
                 self._set_selector_events_mask("r")
 
     def close(self):
+        global clients
+
+        if self.username in clients:
+            print(f"Removing user '{self.username}' as they probably disconnected")
+            del clients[self.username]
+
         print("closing connection to", self.addr)
         try:
             self.selector.unregister(self.sock)

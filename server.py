@@ -8,12 +8,12 @@ import traceback
 import libserver
 
 sel = selectors.DefaultSelector()
+clients = {}
 
 class Server:
     def __init__(self, host, port):
         self.host = host
         self.port = port
-        self.clients = []
 
     def run(self):
         lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
