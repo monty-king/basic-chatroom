@@ -84,6 +84,21 @@ class Message:
         message_hdr = struct.pack(">H", len(jsonheader_bytes))
         message = message_hdr + jsonheader_bytes + content_bytes
         return message
+    
+    def broadcast_message(self, message):
+        for username, client in clients.items():
+            if client != self:
+                client.queue_message(message)
+
+    def queue_message(self, message):
+        content = {"result": f"{self.username}: {message}"}
+        content_encoding = "utf-8"
+        response = {
+            "content_bytes": self._json_encode(content, content_encoding),
+            "content_type": "text/json",
+            "content_encoding": content_encoding,
+        }
+        self._send_buffer += response["content_bytes"]
 
     def _create_response_json_content(self):
         global clients
@@ -107,6 +122,8 @@ class Message:
             message = self.request.get("value")
             print(f"Received message: {message}")
             content = {"result": f"Message received: {message}"}
+
+            self.broadcast_message(message)
         else:
             content = {"result": f'Error: invalid action "{action}".'}
         
