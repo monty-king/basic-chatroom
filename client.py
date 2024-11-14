@@ -7,8 +7,6 @@ import traceback
 
 import libclient
 
-sel = selectors.DefaultSelector()
-
 handle = None
 handle_2 = None
 
@@ -17,11 +15,12 @@ class Client:
         self.host = host
         self.port = port
         self.addr = (host, port)
+        self.sel = selectors.DefaultSelector()
 
     def send_request(self, sock, request):
         events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        message = libclient.Message(sel, sock, self.addr, request)
-        sel.register(sock, events, data=message)
+        message = libclient.Message(self.sel, sock, self.addr, request)
+        self.sel.register(sock, events, data=message)
 
     def start_connection(self):
         print("starting connection to", self.addr)
@@ -73,7 +72,7 @@ if __name__ == '__main__':
 
     try:
         while True:
-            events = sel.select(timeout=1)
+            events = client.sel.select(timeout=1)
             for key, mask in events:
                 message = key.data
                 try:
@@ -101,4 +100,4 @@ if __name__ == '__main__':
     except KeyboardInterrupt:
         print("caught keyboard interrupt, exiting")
     finally:
-        sel.close()
+        client.sel.close()
