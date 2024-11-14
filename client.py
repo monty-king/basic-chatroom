@@ -16,17 +16,27 @@ class Client:
         self.port = port
         self.addr = (host, port)
         self.sel = selectors.DefaultSelector()
+        self.messages = None
 
     def send_request(self, sock, request):
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        message = libclient.Message(self.sel, sock, self.addr, request)
-        self.sel.register(sock, events, data=message)
+        if self.messages:
+            self.messages._send_buffer += self.messages._create_message(
+                content_bytes=self.messages._json_encode(request['content'], 'utf-8'),
+                content_type=request['type'],
+                content_encoding=request['encoding']
+            )
+        else:
+            print("No messages instance found")
 
     def start_connection(self):
         print("starting connection to", self.addr)
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setblocking(False)
         sock.connect_ex(self.addr)
+
+        events = selectors.EVENT_READ | selectors.EVENT_WRITE
+        self.messages = libclient.Message(self.sel, sock, self.addr, request)
+        self.sel.register(sock, events, data=self.messages)
 
         return sock
 
@@ -90,12 +100,8 @@ if __name__ == '__main__':
                     break
                 request = client.create_request("message", msg)
                 # Send new messages without reconnecting
-                message._send_buffer += message._create_message(
-                    content_bytes=message._json_encode(request['content'], 'utf-8'),
-                    content_type=request['type'],
-                    content_encoding=request['encoding']
-                )
-                client.send_request(socket_connection, request)
+                
+                # client.send_request(socket_connection, request)
 
     except KeyboardInterrupt:
         print("caught keyboard interrupt, exiting")
