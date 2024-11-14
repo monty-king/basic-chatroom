@@ -55,12 +55,12 @@ if __name__ == '__main__':
     if handle is None: # the username hasn't been set
         handle = input("Please set a username: ")
 
-    c = Client(host, port)
+    client = Client(host, port)
     print(f"Welcome, {handle}")
 
-    request = c.create_request("register", handle) # register username
-    socket_connection = c.start_connection()
-    c.send_request(socket_connection, request)
+    request = client.create_request("register", handle) # register username
+    socket_connection = client.start_connection()
+    client.send_request(socket_connection, request)
 
     # print("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
     # if handle_2 is None:
@@ -89,14 +89,14 @@ if __name__ == '__main__':
                 msg = input(f"{handle}: ")
                 if msg.lower() == "exit":
                     break
-                request = c.create_request("message", msg)
+                request = client.create_request("message", msg)
                 # Send new messages without reconnecting
                 message._send_buffer += message._create_message(
                     content_bytes=message._json_encode(request['content'], 'utf-8'),
                     content_type=request['type'],
                     content_encoding=request['encoding']
                 )
-                c.send_request(socket_connection, request)
+                client.send_request(socket_connection, request)
 
     except KeyboardInterrupt:
         print("caught keyboard interrupt, exiting")
