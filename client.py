@@ -99,6 +99,8 @@ if __name__ == '__main__':
                 if msg.lower() == "exit":
                     break
                 request = client.create_request("message", msg)
+                client.send_request(socket_connection, request)
+                print("Sending message: "+msg)
                 # Send new messages without reconnecting
                 
                 # client.send_request(socket_connection, request)
