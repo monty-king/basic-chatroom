@@ -4,8 +4,8 @@ This is a "game" where there are multiple chatrooms.  Each room has different fu
 See the SOW file for an idea of implementation
 
 To start the chatroom:
-1. To start the server: python3 server.py \<port\>
-2. To start the client: python3 client.py \<server-hostname\> \<port\>
+1. To start the server: python3 server.py -p PORT
+2. To start the client: python3 client.py -i SERVER -p PORT
 3. From the client, enter the desired username
 4. Now you can chat.
 
