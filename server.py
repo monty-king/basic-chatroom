@@ -4,6 +4,7 @@ import sys
 import socket
 import selectors
 import traceback
+import argparse
 
 import libserver
 
@@ -54,11 +55,11 @@ class Server:
         sel.register(conn, selectors.EVENT_READ, data=message)
 
 if __name__ == '__main__':
-    if len(sys.argv) != 2:
-        print("usage:", sys.argv[0], "<port>")
-        sys.exit(1)
-
-    host, port = "0.0.0.0", int(sys.argv[1])
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-p", "--port", help="specify listening port for server")
+    args = parser.parse_args()
+    
+    host, port = "0.0.0.0", int(args.port)
     s = Server(host, port)
     s.run()
     
