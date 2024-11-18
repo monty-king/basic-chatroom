@@ -3,8 +3,10 @@ import selectors
 import json
 import io
 import struct
+import logging
 
 clients = {}
+logger = logging.getLogger(__name__)
 
 class Message:
     def __init__(self, selector, sock, addr):
@@ -47,7 +49,7 @@ class Message:
 
     def _write(self):
         if self._send_buffer:
-            print("sending", repr(self._send_buffer), "to", self.addr)
+            logging.info("sending" + repr(self._send_buffer) + " to " + str(self.addr))
             try:
                 # Should be ready to write
                 sent = self.sock.send(self._send_buffer)
@@ -120,7 +122,7 @@ class Message:
        
         elif action == "message":
             message = self.request.get("value")
-            print(f"Received message: {message}")
+            logging.info(f"Received message: {message}")
             content = {"result": f"Message received: {message}"}
 
             self.broadcast_message(message)
@@ -187,7 +189,7 @@ class Message:
         try:
             self.selector.unregister(self.sock)
         except Exception as e:
-            print(
+            logging.debug(
                 f"error: selector.unregister() exception for",
                 f"{self.addr}: {repr(e)}",
             )
@@ -195,7 +197,7 @@ class Message:
         try:
             self.sock.close()
         except OSError as e:
-            print(
+            logging.debug(
                 f"error: socket.close() exception for",
                 f"{self.addr}: {repr(e)}",
             )
@@ -236,11 +238,11 @@ class Message:
         if self.jsonheader["content-type"] == "text/json":
             encoding = self.jsonheader["content-encoding"]
             self.request = self._json_decode(data, encoding)
-            print("received request", repr(self.request), "from", self.addr)
+            logging.info("received request" + str(repr(self.request)) + " from " + str(self.addr))
         else:
             # Binary or unknown content-type
             self.request = data
-            print(
+            logging.info(
                 f'received {self.jsonheader["content-type"]} request from',
                 self.addr,
             )
