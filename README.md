@@ -9,6 +9,8 @@ To start the chatroom:
 3. From the client, enter the desired username
 4. Now you can chat.
 
+Enable debug mode by passing --log true, for example: python3 server.py -p PORT --log true
+
 ## Protocol
 The client/server protocol is made up of the following:
 * a fixed length 2 byte integer
