@@ -4,6 +4,7 @@ import sys
 import socket
 import selectors
 import traceback
+import argparse
 
 import libclient
 
@@ -55,11 +56,16 @@ class Client:
             )
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("usage:", sys.argv[0], "<host> <port>")
+    parser = argparse.ArgumentParser()
+    parser.add_argument("-i", "--server", help="specify server host")
+    parser.add_argument("-p", "--port", help="specify bind port to server")
+    args = parser.parse_args()
+
+    if not args.server or not args.port:
+        print("usage: server.py -i SERVER -p HOST")
         sys.exit(1)
 
-    host, port = sys.argv[1], int(sys.argv[2])
+    host, port = args.server, int(args.port)
 
     if handle is None: # the username hasn't been set
         handle = input("Please set a username: ")
@@ -99,6 +105,8 @@ if __name__ == '__main__':
                 if msg.lower() == "exit":
                     break
                 request = client.create_request("message", msg)
+                client.send_request(socket_connection, request)
+                print("Sending message: "+msg)
                 # Send new messages without reconnecting
                 
                 # client.send_request(socket_connection, request)
