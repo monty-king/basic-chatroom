@@ -5,11 +5,13 @@ import socket
 import selectors
 import traceback
 import argparse
+import logging
 
 import libserver
 
 sel = selectors.DefaultSelector()
 clients = {}
+logger = logging.getLogger(__name__)
 
 class Server:
     def __init__(self, host, port):
@@ -37,7 +39,7 @@ class Server:
                         try:
                             message.process_events(mask)
                         except Exception:
-                            print(
+                            logging.info(
                                 "main: error: exception for",
                                 f"{message.addr}:\n{traceback.format_exc()}",
                             )
@@ -49,7 +51,7 @@ class Server:
 
     def accept_wrapper(sock):
         conn, addr = sock.accept()  # Should be ready to read
-        print("accepted connection from", addr)
+        logging.info("accepted connection from "+str(addr))
         conn.setblocking(False)
         message = libserver.Message(sel, conn, addr)
         sel.register(conn, selectors.EVENT_READ, data=message)
@@ -57,7 +59,12 @@ class Server:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="specify listening port for server")
+    parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
+
+    if args.log:
+        if args.log.upper() == "TRUE":
+            logging.basicConfig(level=logging.DEBUG)
     
     host, port = "0.0.0.0", int(args.port)
     s = Server(host, port)

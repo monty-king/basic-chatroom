@@ -3,6 +3,9 @@ import selectors
 import json
 import io
 import struct
+import logging
+
+logger = logging.getLogger(__name__)
 
 class Message:
     def __init__(self, selector, sock, addr, request):
@@ -44,7 +47,7 @@ class Message:
 
     def _write(self):
         if self._send_buffer:
-            print("sending", repr(self._send_buffer), "to", self.addr)
+            logging.info("sending", repr(self._send_buffer), "to", self.addr)
             try:
                 # Should be ready to write
                 sent = self.sock.send(self._send_buffer)
@@ -82,11 +85,11 @@ class Message:
     def _process_response_json_content(self):
         content = self.response
         result = content.get("result")
-        print(f"got result: {result}")
+        logging.info(f"got result: {result}")
 
     def _process_response_binary_content(self):
         content = self.response
-        print(f"got response: {repr(content)}")
+        logging.info(f"got response: {repr(content)}")
 
     def process_events(self, mask):
         if mask & selectors.EVENT_READ:
@@ -120,11 +123,11 @@ class Message:
                 self._set_selector_events_mask("r")
 
     def close(self):
-        print("closing connection to", self.addr)
+        logging.info("closing connection to", self.addr)
         try:
             self.selector.unregister(self.sock)
         except Exception as e:
-            print(
+            logging.info(
                 f"error: selector.unregister() exception for",
                 f"{self.addr}: {repr(e)}",
             )
@@ -132,7 +135,7 @@ class Message:
         try:
             self.sock.close()
         except OSError as e:
-            print(
+            logging.info(
                 f"error: socket.close() exception for",
                 f"{self.addr}: {repr(e)}",
             )
@@ -193,12 +196,12 @@ class Message:
         if self.jsonheader["content-type"] == "text/json":
             encoding = self.jsonheader["content-encoding"]
             self.response = self._json_decode(data, encoding)
-            print("received response", repr(self.response), "from", self.addr)
+            logging.info("received response", repr(self.response), "from", self.addr)
             self._process_response_json_content()
         else:
             # Binary or unknown content-type
             self.response = data
-            print(
+            logging.info(
                 f'received {self.jsonheader["content-type"]} response from',
                 self.addr,
             )

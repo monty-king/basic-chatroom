@@ -5,11 +5,13 @@ import socket
 import selectors
 import traceback
 import argparse
+import logging
 
 import libclient
 
 handle = None
 handle_2 = None
+logger = logging.getLogger(__name__)
 
 class Client:
     def __init__(self, host, port):
@@ -27,10 +29,10 @@ class Client:
                 content_encoding=request['encoding']
             )
         else:
-            print("No messages instance found")
+            logger.info("No messages instance found")
 
     def start_connection(self):
-        print("starting connection to", self.addr)
+        logger.info("starting connection to"+ str(self.addr))
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setblocking(False)
         sock.connect_ex(self.addr)
@@ -59,11 +61,16 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
+    parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
     if not args.server or not args.port:
-        print("usage: server.py -i SERVER -p HOST")
+        logging.info("usage: server.py -i SERVER -p HOST")
         sys.exit(1)
+    
+    if args.log:
+        if args.log.upper() == "TRUE":
+            logging.basicConfig(level=logging.DEBUG)
 
     host, port = args.server, int(args.port)
 
@@ -77,12 +84,12 @@ if __name__ == '__main__':
     socket_connection = client.start_connection()
     client.send_request(socket_connection, request)
 
-    # print("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
+    # logging.info("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
     # if handle_2 is None:
     #     handle_2 = input("'join' or 'exit'")
     # if handle_2 == 'join':
         
-    #     print("Use 'exit' at any time to quit")
+    #     logging.info("Use 'exit' at any time to quit")
     # #if handle_2 == 'exit':
     # #    handle = 'exit'
 
@@ -94,7 +101,7 @@ if __name__ == '__main__':
                 try:
                     message.process_events(mask)
                 except Exception:
-                    print(
+                    logger.warning(
                         "main: error: exception for",
                         f"{message.addr}:\n{traceback.format_exc()}",
                     )
@@ -106,12 +113,12 @@ if __name__ == '__main__':
                     break
                 request = client.create_request("message", msg)
                 client.send_request(socket_connection, request)
-                print("Sending message: "+msg)
+                logger.info("Sending message: "+msg)
                 # Send new messages without reconnecting
                 
                 # client.send_request(socket_connection, request)
 
     except KeyboardInterrupt:
-        print("caught keyboard interrupt, exiting")
+        logging.info("caught keyboard interrupt, exiting")
     finally:
         client.sel.close()
