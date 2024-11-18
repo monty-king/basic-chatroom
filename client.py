@@ -22,6 +22,7 @@ class Client:
         self.messages = None
 
     def send_request(self, sock, request):
+        print("send request")
         if self.messages:
             self.messages._send_buffer += self.messages._create_message(
                 content_bytes=self.messages._json_encode(request['content'], 'utf-8'),
@@ -44,6 +45,7 @@ class Client:
         return sock
 
     def create_request(self, action, value):
+        print("create request")
         if action in ["register", "message"]:
             return dict(
                 type="text/json",
@@ -51,11 +53,12 @@ class Client:
                 content=dict(action=action, value=value),
             )
         else:
-            return dict(
-                type="binary/custom-client-binary-type",
-                encoding="binary",
-                content=bytes(action + value, encoding="utf-8"),
-            )
+            pass
+            #return dict(
+            #    type="binary/custom-client-binary-type",
+            #    encoding="binary",
+            #    content=bytes(action + value, encoding="utf-8"),
+            #)
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
@@ -84,15 +87,6 @@ if __name__ == '__main__':
     socket_connection = client.start_connection()
     client.send_request(socket_connection, request)
 
-    # logging.info("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
-    # if handle_2 is None:
-    #     handle_2 = input("'join' or 'exit'")
-    # if handle_2 == 'join':
-        
-    #     logging.info("Use 'exit' at any time to quit")
-    # #if handle_2 == 'exit':
-    # #    handle = 'exit'
-
     try:
         while True:
             events = client.sel.select(timeout=1)
@@ -111,7 +105,7 @@ if __name__ == '__main__':
                 msg = input(f"{handle}: ")
                 if msg.lower() == "exit":
                     break
-                request = client.create_request("message", msg)
+                request = client.create_request(action = "message", value = msg)
                 client.send_request(socket_connection, request)
                 logger.info("Sending message: "+msg)
                 # Send new messages without reconnecting

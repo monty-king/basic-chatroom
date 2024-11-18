@@ -38,6 +38,7 @@ class Server:
                         message = key.data
                         try:
                             message.process_events(mask)
+                            print("event should be processed")
                         except Exception:
                             logging.info(
                                 "main: error: exception for",

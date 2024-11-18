@@ -23,6 +23,7 @@ class Message:
         self.clients = []
 
     def _set_selector_events_mask(self, mode):
+        print("set mask")
         """Set selector to listen for events: mode is 'r', 'w', or 'rw'."""
         if mode == "r":
             events = selectors.EVENT_READ
@@ -35,6 +36,7 @@ class Message:
         self.selector.modify(self.sock, events, data=self)
 
     def _read(self):
+        print("_read")
         try:
             # Should be ready to read
             data = self.sock.recv(4096)
@@ -48,6 +50,7 @@ class Message:
                 raise RuntimeError("Peer closed.")
 
     def _write(self):
+        print("_write")
         if self._send_buffer:
             logging.info("sending" + repr(self._send_buffer) + " to " + str(self.addr))
             try:
@@ -59,13 +62,16 @@ class Message:
             else:
                 self._send_buffer = self._send_buffer[sent:]
                 # Close when the buffer is drained. The response has been sent.
-                # if sent and not self._send_buffer:
+                #if sent and not self._send_buffer:
+                #    self._set_selector_events_mask("r")
                 #     self.close()
 
     def _json_encode(self, obj, encoding):
+        print("json encode")
         return json.dumps(obj, ensure_ascii=False).encode(encoding)
 
     def _json_decode(self, json_bytes, encoding):
+        print("json decode")
         tiow = io.TextIOWrapper(
             io.BytesIO(json_bytes), encoding=encoding, newline=""
         )
@@ -76,6 +82,7 @@ class Message:
     def _create_message(
         self, *, content_bytes, content_type, content_encoding
     ):
+        print("create message")
         jsonheader = {
             "byteorder": sys.byteorder,
             "content-type": content_type,
@@ -88,11 +95,13 @@ class Message:
         return message
     
     def broadcast_message(self, message):
+        print("broadcast message")
         for username, client in clients.items():
             if client != self:
                 client.queue_message(message)
 
     def queue_message(self, message):
+        print("queue message")
         content = {"result": f"{self.username}: {message}"}
         content_encoding = "utf-8"
         response = {
@@ -103,6 +112,7 @@ class Message:
         self._send_buffer += response["content_bytes"]
 
     def _create_response_json_content(self):
+        print("create json response")
         global clients
 
         action = self.request.get("action")
@@ -137,22 +147,25 @@ class Message:
         }
         return response
 
-    def _create_response_binary_content(self):
-        response = {
-            "content_bytes": b"First 10 bytes of request: "
-            + self.request[:10],
-            "content_type": "binary/custom-server-binary-type",
-            "content_encoding": "binary",
-        }
-        return response
+    #def _create_response_binary_content(self):
+    #    print("create binary response")
+    #    response = {
+    #        "content_bytes": b"First 10 bytes of request: "
+    #        + self.request[:10],
+    #        "content_type": "binary/custom-server-binary-type",
+    #        "content_encoding": "binary",
+    #    }
+    #    return response
 
     def process_events(self, mask):
+        print("process events")
         if mask & selectors.EVENT_READ:
             self.read()
         if mask & selectors.EVENT_WRITE:
             self.write()
 
     def read(self):
+        print("read")
         self._read()
 
         if self._jsonheader_len is None:
@@ -167,6 +180,7 @@ class Message:
                 self.process_request()
 
     def write(self):
+        print("write")
         if self.request:
             if not self.response_created:
                 self.create_response()
@@ -179,6 +193,7 @@ class Message:
                 self._set_selector_events_mask("r")
 
     def close(self):
+        print("close")
         global clients
 
         if self.username in clients:
@@ -206,6 +221,7 @@ class Message:
             self.sock = None
 
     def process_protoheader(self):
+        print("process proto header")
         hdrlen = 2
         if len(self._recv_buffer) >= hdrlen:
             self._jsonheader_len = struct.unpack(
@@ -214,6 +230,7 @@ class Message:
             self._recv_buffer = self._recv_buffer[hdrlen:]
 
     def process_jsonheader(self):
+        print("process json header")
         hdrlen = self._jsonheader_len
         if len(self._recv_buffer) >= hdrlen:
             self.jsonheader = self._json_decode(
@@ -230,6 +247,7 @@ class Message:
                     raise ValueError(f'Missing required header "{reqhdr}".')
 
     def process_request(self):
+        print("process request")
         content_len = self.jsonheader["content-length"]
         if not len(self._recv_buffer) >= content_len:
             return
@@ -250,11 +268,13 @@ class Message:
         self._set_selector_events_mask("w")
 
     def create_response(self):
+        print("create response")
         if self.jsonheader["content-type"] == "text/json":
             response = self._create_response_json_content()
         else:
+            pass
             # Binary or unknown content-type
-            response = self._create_response_binary_content()
+            #response = self._create_response_binary_content()
         message = self._create_message(**response)
         self.response_created = True
         self._send_buffer += message
