@@ -59,7 +59,7 @@ class Server:
 if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-p", "--port", help="specify listening port for server")
-    parser.add_argument("--log", help="enable debug")
+    parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
     if args.log:

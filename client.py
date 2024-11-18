@@ -61,7 +61,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
-    parser.add_argument("--log", help="enable debug")
+    parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
     if not args.server or not args.port:
@@ -78,7 +78,7 @@ if __name__ == '__main__':
         handle = input("Please set a username: ")
 
     client = Client(host, port)
-    logging.info(f"Welcome, {handle}")
+    print(f"Welcome, {handle}")
 
     request = client.create_request("register", handle) # register username
     socket_connection = client.start_connection()

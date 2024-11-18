@@ -7,9 +7,12 @@ To start the chatroom:
 1. To start the server: python3 server.py -p PORT
 2. To start the client: python3 client.py -i SERVER -p PORT
 3. From the client, enter the desired username
-4. Now you can chat.
+4. Now you can chat
+5. Use 'exit' from the client to leave the session
 
-Enable debug mode by passing --log true, for example: python3 server.py -p PORT --log true
+Other options:
+1. To see the full list of options, use the --help option
+2. Enable debug mode by passing --log true
 
 ## Protocol
 The client/server protocol is made up of the following:
