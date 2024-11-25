@@ -82,16 +82,7 @@ if __name__ == '__main__':
 
     request = client.create_request("register", handle) # register username
     socket_connection = client.start_connection()
-    client.send_request(socket_connection, request)
-
-    # logging.info("Send 'join' to go to a chatroom. Use 'exit' at any time to quit")
-    # if handle_2 is None:
-    #     handle_2 = input("'join' or 'exit'")
-    # if handle_2 == 'join':
-        
-    #     logging.info("Use 'exit' at any time to quit")
-    # #if handle_2 == 'exit':
-    # #    handle = 'exit'
+    # client.send_request(socket_connection, request)
 
     try:
         while True:
@@ -102,7 +93,7 @@ if __name__ == '__main__':
                     message.process_events(mask)
                 except Exception:
                     logger.warning(
-                        "main: error: exception for",
+                        "main: error: exception for "+
                         f"{message.addr}:\n{traceback.format_exc()}",
                     )
                     message.close()

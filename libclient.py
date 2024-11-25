@@ -47,7 +47,7 @@ class Message:
 
     def _write(self):
         if self._send_buffer:
-            logging.info("sending", repr(self._send_buffer), "to", self.addr)
+            logging.info("sending "+str(repr(self._send_buffer))+" to "+str(self.addr))
             try:
                 # Should be ready to write
                 sent = self.sock.send(self._send_buffer)
@@ -123,7 +123,7 @@ class Message:
                 self._set_selector_events_mask("r")
 
     def close(self):
-        logging.info("closing connection to", self.addr)
+        logging.info("closing connection to " +str(self.addr))
         try:
             self.selector.unregister(self.sock)
         except Exception as e:
@@ -196,7 +196,7 @@ class Message:
         if self.jsonheader["content-type"] == "text/json":
             encoding = self.jsonheader["content-encoding"]
             self.response = self._json_decode(data, encoding)
-            logging.info("received response", repr(self.response), "from", self.addr)
+            logging.info("received response "+str(repr(self.response))+" from "+str(self.addr))
             self._process_response_json_content()
         else:
             # Binary or unknown content-type
