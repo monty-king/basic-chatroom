@@ -9,7 +9,7 @@ import sys
 logger = logging.getLogger(__name__)
 connections = []
 
-def handle_user_connection(connection: socket.socket, address: str) -> None:
+def handle_user_connection(connection: socket.socket, address: str):
     while True:
         try:
             # Get client message
@@ -33,7 +33,6 @@ def handle_user_connection(connection: socket.socket, address: str) -> None:
             remove(connection)
             break
 
-
 def broadcast(message, connection):
     for client_conn in connections:
         if client_conn != connection:
@@ -46,7 +45,7 @@ def broadcast(message, connection):
                 remove(client_conn)
 
 
-def remove(conn: socket.socket) -> None:
+def remove(conn: socket.socket):
     if conn in connections:
         # Close socket connection and remove connection
         conn.close()
@@ -54,7 +53,6 @@ def remove(conn: socket.socket) -> None:
 
 
 def server():
-
     try:
         lsock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         lsock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
@@ -64,7 +62,6 @@ def server():
         print("listening on", (host, port))
         
         while True:
-
             # Accept client connection
             socket_connection, address = lsock.accept()
             # Add client connection to connections list
@@ -72,18 +69,17 @@ def server():
            
             # Start new client thread
             threading.Thread(target=handle_user_connection, args=[socket_connection, address]).start()
-            print("Client " + str(address) + " has joined")
+            print("client " + str(address[0]) + " has joined")
 
     except Exception as e:
         print(f'An error has occurred when instancing socket: {e}')
     finally:
-        # In case of any problem we clean all connections and close the server connection
+        # In case of any problem clean all connections and close the server connection
         if len(connections) > 0:
             for conn in connections:
                 remove(conn)
 
         lsock.close()
-
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()

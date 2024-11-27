@@ -1,10 +1,12 @@
+#!/usr/bin/env python3
+
 import socket
 import threading
 import argparse
 import logging
 import sys
 
-def handle_messages(connection: socket.socket):
+def handle_messages(connection):
     while True:
         try:
             msg = connection.recv(2048)
@@ -19,6 +21,7 @@ def handle_messages(connection: socket.socket):
             print(f'Error handling message from server: {e}')
             connection.close()
             break
+
 
 def client(host, port):
     try:
@@ -57,7 +60,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if not args.server or not args.port:
-        logging.info("usage: server.py -i SERVER -p HOST")
+        logging.info("usage: client.py -i SERVER -p HOST")
         sys.exit(1)
     
     if args.log:
