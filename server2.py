@@ -8,8 +8,15 @@ import sys
 
 logger = logging.getLogger(__name__)
 connections = []
+handles = {}
 
-def handle_user_connection(connection: socket.socket, address: str):
+def handle_user_connection(connection, address):
+    # connection.send("Please enter a username: ".encode())
+    username = connection.recv(2048).decode().strip()
+    handles[connection] = username
+
+    print(username + " (" + address[0] + ") has joined")
+
     while True:
         try:
             # Get client message
@@ -17,10 +24,10 @@ def handle_user_connection(connection: socket.socket, address: str):
 
             if msg:
                 # Log message sent by user
-                print(f'{address[0]}:{address[1]} - {msg.decode()}')
+                print(f'{username}@{address[0]}: {msg.decode()}')
                 
                 # Build message format and broadcast to users connected on server
-                msg_to_send = f'From {address[0]}:{address[1]} - {msg.decode()}'
+                msg_to_send = f'\n{username}: {msg.decode()}'
                 broadcast(msg_to_send, connection)
 
             # Close connection if no message was sent
@@ -29,7 +36,7 @@ def handle_user_connection(connection: socket.socket, address: str):
                 break
 
         except Exception as e:
-            print(f'Error to handle user connection: {e}')
+            print(f'Error handling user connection: {e}')
             remove(connection)
             break
 
@@ -45,7 +52,7 @@ def broadcast(message, connection):
                 remove(client_conn)
 
 
-def remove(conn: socket.socket):
+def remove(conn):
     if conn in connections:
         # Close socket connection and remove connection
         conn.close()
@@ -68,7 +75,7 @@ def server():
             connections.append(socket_connection)
            
             # Start new client thread
-            threading.Thread(target=handle_user_connection, args=[socket_connection, address]).start()
+            threading.Thread(target=handle_user_connection, args=[socket_connection, address,]).start()
             print("client " + str(address[0]) + " has joined")
 
     except Exception as e:

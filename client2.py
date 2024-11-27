@@ -23,11 +23,14 @@ def handle_messages(connection):
             break
 
 
-def client(host, port):
+def client(host, port, username):
     try:
         # Instantiate socket and start connection with server
         socket_instance = socket.socket()
         socket_instance.connect((host, port))
+
+        socket_instance.send(username.encode())
+
         # Create a thread in order to handle messages sent by server
         threading.Thread(target=handle_messages, args=[socket_instance]).start()
 
@@ -35,7 +38,7 @@ def client(host, port):
 
         # Main event loop
         while True:
-            msg = input()
+            msg = input(username + ": ")
 
             if msg == 'exit':
                 print("Goodbye")
@@ -56,6 +59,7 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
+    parser.add_argument("-u", "--username", help="specify username")
     parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
@@ -67,5 +71,8 @@ if __name__ == "__main__":
         if args.log.upper() == "TRUE":
             logging.basicConfig(level=logging.DEBUG)
 
-    host, port = args.server, int(args.port)
-    client(host, port)
+    if not args.username:
+        args.username = input("Specify a username for this session: ")
+
+    host, port, username = args.server, int(args.port), args.username
+    client(host, port, username)
