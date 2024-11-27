@@ -24,12 +24,15 @@ def handle_messages(connection):
 
 
 def client(host, port, username):
+    room = "default"
+
     try:
         # Instantiate socket and start connection with server
         socket_instance = socket.socket()
         socket_instance.connect((host, port))
 
         socket_instance.send(username.encode())
+        socket_instance.send(room.encode())
 
         # Create a thread in order to handle messages sent by server
         threading.Thread(target=handle_messages, args=[socket_instance]).start()

@@ -9,11 +9,15 @@ import sys
 logger = logging.getLogger(__name__)
 connections = []
 handles = {}
+rooms = ["default", "nerds"]
 
 def handle_user_connection(connection, address):
     # connection.send("Please enter a username: ".encode())
     username = connection.recv(2048).decode().strip()
     handles[connection] = username
+    room = connection.recv(2048).decode().strip()
+    if room not in rooms:
+        room = "default"
 
     print(username + " (" + address[0] + ") has joined")
 
@@ -23,12 +27,16 @@ def handle_user_connection(connection, address):
             msg = connection.recv(2048)
 
             if msg:
-                # Log message sent by user
-                print(f'{username}@{address[0]}: {msg.decode()}')
-                
-                # Build message format and broadcast to users connected on server
-                msg_to_send = f'\n{username}: {msg.decode()}'
-                broadcast(msg_to_send, connection)
+                if msg.decode()[0] == "/":
+                    parse_user_command(msg.decode(), connection)
+
+                else:
+                    # Build message format and broadcast to users connected on server
+                    msg_to_send = f'\n{username}: {msg.decode()}'
+                    broadcast(msg_to_send, connection)
+
+                    # Log message sent by user
+                    print(f'{username}@{address[0]}: {msg.decode()}')
 
             # Close connection if no message was sent
             else:
@@ -39,6 +47,28 @@ def handle_user_connection(connection, address):
             print(f'Error handling user connection: {e}')
             remove(connection)
             break
+
+def parse_user_command(command, client_conn):
+    try:
+        cmd = command[1:command.index(" ")]
+    except ValueError:
+        cmd = command[1:]
+
+    if cmd == "help":
+        send(cmd, client_conn)
+
+    elif cmd == "join":
+        print("join command")
+
+    elif cmd == "list":
+        chatrooms = "\n\nAvailable Rooms\n===============\n"
+        for room in rooms:
+            chatrooms += room + "\n"
+        
+        send(chatrooms, client_conn)
+
+    else:
+        print("Unknown command")
 
 def broadcast(message, connection):
     for client_conn in connections:
@@ -51,6 +81,8 @@ def broadcast(message, connection):
                 print('Error broadcasting message: {e}')
                 remove(client_conn)
 
+def send(message, connection):
+    connection.send(message.encode())
 
 def remove(conn):
     if conn in connections:
