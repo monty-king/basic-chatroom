@@ -9,6 +9,7 @@ import sys
 logger = logging.getLogger(__name__)
 connections = []
 handles = {}
+user_rooms = {}
 rooms = ["default", "nerds"]
 
 def handle_user_connection(connection, address):
@@ -18,6 +19,9 @@ def handle_user_connection(connection, address):
     room = connection.recv(2048).decode().strip()
     if room not in rooms:
         room = "default"
+
+    user_rooms[connection] = room
+    connection.send(("\n\nYou are currently in room " + room).encode())
 
     print(username + " (" + address[0] + ") has joined")
 
@@ -55,10 +59,29 @@ def parse_user_command(command, client_conn):
         cmd = command[1:]
 
     if cmd == "help":
-        send(cmd, client_conn)
+        help_msg = "\n\n/help - Show available commands\n" \
+                   "/info - Show current room\n" \
+                   "/list - List available rooms\n" \
+                   "/join <room> - Join a different room\n"
+        send(help_msg, client_conn)
+
+    elif cmd == "info":
+        current_room = user_rooms.get(client_conn)
+        send("You are currently in room: " + current_room, client_conn)
 
     elif cmd == "join":
-        print("join command")
+        try:
+            target_room = command.split(" ", 1)[1].strip()
+            if target_room in rooms:
+                current_room = user_rooms.get(client_conn)
+                user_rooms[client_conn] = target_room
+                send("You have joined room " + target_room, client_conn)
+
+            else:
+                send("This room does not exist", client_conn)
+
+        except IndexError:
+            send("Usage: /join <room>", client_conn)
 
     elif cmd == "list":
         chatrooms = "\n\nAvailable Rooms\n===============\n"
@@ -71,8 +94,9 @@ def parse_user_command(command, client_conn):
         print("Unknown command")
 
 def broadcast(message, connection):
+    broadcast_room = user_rooms.get(connection)
     for client_conn in connections:
-        if client_conn != connection:
+        if client_conn != connection and user_rooms.get(client_conn) == broadcast_room:
             try:
                 client_conn.send(message.encode())
 
