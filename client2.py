@@ -74,7 +74,7 @@ if __name__ == "__main__":
         if args.log.upper() == "TRUE":
             logging.basicConfig(level=logging.DEBUG)
 
-    if not args.username:
+    while not args.username or args.username == "":
         args.username = input("Specify a username for this session: ")
 
     host, port, username = args.server, int(args.port), args.username
