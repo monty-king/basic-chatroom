@@ -122,18 +122,17 @@ def server():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
     parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
-    if not args.server or not args.port:
-        print("usage: server.py -i SERVER -p HOST")
+    if not args.port:
+        print("usage: server.py -p HOST")
         sys.exit(1)
     
     if args.log:
         if args.log.upper() == "TRUE":
             logging.basicConfig(level=logging.DEBUG)
 
-    host, port = args.server, int(args.port)
+    host, port = "0.0.0.0", int(args.port)
     server()
