@@ -13,7 +13,11 @@ def handle_messages(connection):
             msg = connection.recv(2048)
 
             if msg:
-                print(msg.decode())
+                sys.stdout.write("\r" + " " * 80)
+                sys.stdout.write("\r" + msg.decode())
+                sys.stdout.flush()
+                sys.stdout.write(f"\n{username}: ")
+                sys.stdout.flush()
             else:
                 connection.close()
                 break
@@ -40,7 +44,7 @@ def client(host, port, username):
         threading.Thread(target=handle_messages, args=[socket_instance]).start()
 
         print("Connected to "+host)
-
+        
         # Main event loop
         while True:
             msg = input(username + ": ")
