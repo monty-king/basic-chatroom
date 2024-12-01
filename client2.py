@@ -44,7 +44,7 @@ def client(host, port, username):
         threading.Thread(target=handle_messages, args=[socket_instance]).start()
 
         print("Connected to "+host)
-        
+
         # Main event loop
         while True:
             msg = input(username + ": ")
@@ -60,7 +60,7 @@ def client(host, port, username):
         socket_instance.close()
 
     except Exception as e:
-        print(f'Error connecting to server socket {e}')
+        print(f'Error connecting to server socket, is the server up?')
         socket_instance.close()
 
 

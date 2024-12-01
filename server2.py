@@ -35,12 +35,9 @@ def handle_user_connection(connection, address):
                     parse_user_command(msg.decode(), connection)
 
                 else:
-                    # Build message format and broadcast to users connected on server
+                    # Broadcast to users connected on server
                     msg_to_send = f'\n{username}: {msg.decode()}'
                     broadcast(msg_to_send, connection)
-
-                    # Log message sent by user
-                    print(f'{username}@{address[0]}: {msg.decode()}')
 
             # Close connection if no message was sent
             else:
@@ -59,15 +56,17 @@ def parse_user_command(command, client_conn):
         cmd = command[1:]
 
     if cmd == "help":
-        help_msg = "\n\n/help - Show available commands\n" \
+        help_msg = "\n/help - Show available commands\n" \
                    "/info - Show current room\n" \
                    "/list - List available rooms\n" \
-                   "/join <room> - Join a different room\n"
+                   "/join <room> - Join a different room\n" \
+                   "/add <room> - Create a room\n" \
+                   "/remove <room> - Delete room\n"
         send(help_msg, client_conn)
 
     elif cmd == "info":
         current_room = user_rooms.get(client_conn)
-        send("You are currently in room: " + current_room, client_conn)
+        send("\nYou are currently in room: " + current_room + "\n", client_conn)
 
     elif cmd == "join":
         try:
@@ -75,23 +74,58 @@ def parse_user_command(command, client_conn):
             if target_room in rooms:
                 current_room = user_rooms.get(client_conn)
                 user_rooms[client_conn] = target_room
-                send("You have joined room " + target_room, client_conn)
+                send("\nYou have joined room " + target_room + "\n", client_conn)
 
             else:
-                send("This room does not exist", client_conn)
+                send("\nThis room does not exist\n", client_conn)
 
         except IndexError:
-            send("Usage: /join <room>", client_conn)
+            send("\nUsage: /join <room>\n", client_conn)
+
+    elif cmd == "add":
+        try:
+            target_room = command.split(" ", 1)[1].strip()
+            if target_room not in rooms:
+                rooms.append(target_room)
+                user_rooms[client_conn] = target_room
+                send("\nRoom " + target_room + " has been created\n", client_conn)
+
+            else:
+                send("\nRoom already exists\n", client_conn)
+
+        except IndexError:
+            send("\nUsage: /add <room>\n", client_conn)
+
+    elif cmd == "remove":
+        try:
+            target_room = command.split(" ", 1)[1].strip()
+
+            if target_room == "default":
+                send("\nCannot remove the default room\n", client_conn)
+
+            elif target_room in rooms:
+                active_users = [conn for conn, room in user_rooms.items() if room == target_room]
+                if active_users:
+                    send("\nCannot remove room " + target_room + " because it is occupied\n", client_conn)
+                else:
+                    rooms.remove(target_room)
+                    send("\nRoom " + target_room + " has been deleted\n", client_conn)
+
+            else:
+                send("\nRoom doesn't exist\n", client_conn)
+
+        except IndexError:
+            send("\nUsage: /remove <room>\n", client_conn)
 
     elif cmd == "list":
-        chatrooms = "\n\nAvailable Rooms\n===============\n"
+        chatrooms = "\nAvailable Rooms\n===============\n"
         for room in rooms:
             chatrooms += room + "\n"
         
         send(chatrooms, client_conn)
 
     else:
-        print("Unknown command")
+        send("\nUnknown command, use /help for available options\n", client_conn)
 
 def broadcast(message, connection):
     broadcast_room = user_rooms.get(connection)
@@ -132,7 +166,6 @@ def server():
            
             # Start new client thread
             threading.Thread(target=handle_user_connection, args=[socket_connection, address,]).start()
-            print("client " + str(address[0]) + " has joined")
 
     except Exception as e:
         print(f'An error has occurred when instancing socket: {e}')
