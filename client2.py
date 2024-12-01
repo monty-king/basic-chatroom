@@ -5,6 +5,7 @@ import threading
 import argparse
 import logging
 import sys
+import time
 
 def handle_messages(connection):
     while True:
@@ -32,6 +33,7 @@ def client(host, port, username):
         socket_instance.connect((host, port))
 
         socket_instance.send(username.encode())
+        time.sleep(0.1)
         socket_instance.send(room.encode())
 
         # Create a thread in order to handle messages sent by server
