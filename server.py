@@ -86,6 +86,7 @@ def parse_user_command(command, client_conn):
                 current_room = user_rooms.get(client_conn)
                 user_rooms[client_conn] = target_room
                 send("\nYou have joined room " + target_room + "\n", client_conn)
+                broadcast(username + " has joined the chat", client_conn)
 
             else:
                 send("\nThis room does not exist.  Perhaps create it with the /add command?\n", client_conn)
