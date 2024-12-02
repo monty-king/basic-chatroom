@@ -7,8 +7,10 @@ import logging
 import sys
 import time
 
+exit_signal = threading.Event()
+
 def handle_messages(connection):
-    while True:
+    while not exit_signal.is_set():
         try:
             msg = connection.recv(2048)
 
@@ -19,6 +21,7 @@ def handle_messages(connection):
                 sys.stdout.write(f"\n{username}: ")
                 sys.stdout.flush()
             else:
+                print("\nServer disconnected, exiting")
                 connection.close()
                 break
 
@@ -41,26 +44,27 @@ def client(host, port, username):
         socket_instance.send(room.encode())
 
         # Create a thread in order to handle messages sent by server
-        threading.Thread(target=handle_messages, args=[socket_instance]).start()
+        listen_thread = threading.Thread(target=handle_messages, args=[socket_instance])
+        listen_thread.start()
 
         print("Connected to "+host)
 
         # Main event loop
-        while True:
+        while not exit_signal.is_set():
             msg = input(username + ": ")
 
-            if msg == 'exit':
-                print("Goodbye")
+            if msg == '/exit':
+                exit_signal.set() # stop the thread
+                socket_instance.send(msg.encode())
+                socket_instance.close()
                 break
 
             # Parse message to utf-8
             socket_instance.send(msg.encode())
 
-        # Close connection
-        socket_instance.close()
-
     except Exception as e:
         print(f'Error connecting to server socket, is the server up?')
+    finally:
         socket_instance.close()
 
 

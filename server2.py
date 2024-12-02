@@ -31,7 +31,14 @@ def handle_user_connection(connection, address):
             msg = connection.recv(2048)
 
             if msg:
-                if msg.decode()[0] == "/":
+
+                if msg.decode() == "/exit":
+                    print(username + " (" + address[0] + ") has left")
+                    send("\nGoodbye\n", connection)
+                    remove(connection)
+                    break
+
+                elif msg.decode()[0] == "/":
                     parse_user_command(msg.decode(), connection)
 
                 else:
@@ -57,6 +64,7 @@ def parse_user_command(command, client_conn):
 
     if cmd == "help":
         help_msg = "\n/help - Show available commands\n" \
+                   "/exit - End the session\n" \
                    "/info - Show current room\n" \
                    "/list - List available rooms\n" \
                    "/join <room> - Join a different room\n" \
@@ -127,6 +135,7 @@ def parse_user_command(command, client_conn):
     else:
         send("\nUnknown command, use /help for available options\n", client_conn)
 
+
 def broadcast(message, connection):
     broadcast_room = user_rooms.get(connection)
     for client_conn in connections:
@@ -142,11 +151,16 @@ def broadcast(message, connection):
 def send(message, connection):
     connection.send(message.encode())
 
+
 def remove(conn):
     if conn in connections:
         # Close socket connection and remove connection
+        username = handles.pop(conn, None)
+        room = user_rooms.pop(conn, None)
         conn.close()
         connections.remove(conn)
+
+        broadcast(username + " left the chat", conn)
 
 
 def server():
@@ -161,7 +175,6 @@ def server():
         while True:
             # Accept client connection
             socket_connection, address = lsock.accept()
-            # Add client connection to connections list
             connections.append(socket_connection)
            
             # Start new client thread
