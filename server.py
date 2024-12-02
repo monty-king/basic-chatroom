@@ -83,7 +83,6 @@ def parse_user_command(command, client_conn):
             target_room = command.split(" ", 1)[1].strip()
             if target_room in rooms:
                 broadcast(username + " has left the chat", client_conn)
-                print('asdf')
                 current_room = user_rooms.get(client_conn)
                 user_rooms[client_conn] = target_room
                 send("\nYou have joined room " + target_room + "\n", client_conn)
