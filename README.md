@@ -1,9 +1,9 @@
 # MultiRoom Chat
-This is a "game" where there are multiple chatrooms.  Each room has different functionality where you can do different things.  
+This is a "game" where there are multiple chatrooms.  Users may freely move between chatrooms. 
 
 See the SOW file for an idea of implementation
 
-There are no third party libraries needed for this project.
+There are no third party libraries needed for this project, it can be run natively on the CS machines
 
 To start the chatroom:
 1. To start the server: python3 server.py -p PORT
@@ -19,6 +19,7 @@ Other options:
 ## Options
 ### /help
 The following options are available:
+```
 /help - Show available commands
 /exit - End the session
 /info - Show current room
@@ -26,7 +27,7 @@ The following options are available:
 /join <room> - Join a different room
 /add <room> - Create a room
 /remove <room> - Delete room
-
+```
 
 ## Protocol
 The client/server protocol is made up of the following:
