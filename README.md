@@ -15,6 +15,7 @@ To start the chatroom:
 Other options:
 1. To see the full list of options, use the runtime /help option
 2. Enable debug mode by passing --log true as a command line argument
+3. To set username when joining, pass -u USERNAME
 
 ## Options
 ### /help
