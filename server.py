@@ -10,7 +10,7 @@ logger = logging.getLogger(__name__)
 connections = []
 handles = {}
 user_rooms = {}
-rooms = ["default", "nerds"]
+rooms = ["default"]
 
 def handle_user_connection(connection, address):
     # connection.send("Please enter a username: ".encode())
@@ -85,7 +85,7 @@ def parse_user_command(command, client_conn):
                 send("\nYou have joined room " + target_room + "\n", client_conn)
 
             else:
-                send("\nThis room does not exist\n", client_conn)
+                send("\nThis room does not exist.  Perhaps create it with the /add command?\n", client_conn)
 
         except IndexError:
             send("\nUsage: /join <room>\n", client_conn)

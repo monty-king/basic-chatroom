@@ -48,6 +48,7 @@ def client(host, port, username):
         listen_thread.start()
 
         print("\rConnected to " + host + "\n")
+        print("Use the /help command for a description of options")
 
         # Main event loop
         while not exit_signal.is_set():

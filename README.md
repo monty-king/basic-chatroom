@@ -32,3 +32,12 @@ The following options are available:
 ## Protocol
 The client/server protocol is made up of the following:
 * text converted to UTF8 bytes array
+
+## Known Issues
+* Thread issues of console output on the client side, shouldn't impact functionality
+
+## Improvements
+* Ability to see what users are in current room
+* Encryption between client and server
+* Permissions of users delegated to create/remove rooms
+* Some sort of GUI interface
