@@ -55,10 +55,16 @@ def parse_user_command(command, client_conn):
         cmd = command[1:]
 
     if cmd == "help":
-        send(cmd, client_conn)
+        #send(cmd, client_conn)
+        send("/join to join a new room\n/list shows all avaliable rooms\n exit to leave the chatroom", client_conn)
 
     elif cmd == "join":
         print("join command")
+        room = command[command.index(" ")+1:]
+        if room in rooms:
+            print(client_conn)
+            #handle_user_connection(client_conn, client_conn.laddr[0], room)
+        print(room)
 
     elif cmd == "list":
         chatrooms = "\n\nAvailable Rooms\n===============\n"
@@ -122,12 +128,12 @@ def server():
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument("-i", "--server", help="specify server host")
+    #parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
     parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
-    if not args.server or not args.port:
+    if not args.port:
         print("usage: server.py -i SERVER -p HOST")
         sys.exit(1)
     
@@ -135,5 +141,5 @@ if __name__ == "__main__":
         if args.log.upper() == "TRUE":
             logging.basicConfig(level=logging.DEBUG)
 
-    host, port = args.server, int(args.port)
+    host, port = "0.0.0.0", int(args.port)
     server()

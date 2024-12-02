@@ -38,6 +38,7 @@ def client(host, port, username):
         threading.Thread(target=handle_messages, args=[socket_instance]).start()
 
         print("Connected to "+host)
+        print("Welcome to the chat room\nTo leave at any time send 'exit'\nFor help just do /help\nEnjoy!")
 
         # Main event loop
         while True:
