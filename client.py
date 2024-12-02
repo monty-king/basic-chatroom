@@ -1,115 +1,92 @@
 #!/usr/bin/env python3
 
-import sys
 import socket
-import selectors
-import traceback
+import threading
 import argparse
 import logging
+import sys
+import time
 
-import libclient
+exit_signal = threading.Event()
 
-handle = None
-handle_2 = None
-logger = logging.getLogger(__name__)
+def handle_messages(connection):
+    while not exit_signal.is_set():
+        try:
+            msg = connection.recv(2048)
 
-class Client:
-    def __init__(self, host, port):
-        self.host = host
-        self.port = port
-        self.addr = (host, port)
-        self.sel = selectors.DefaultSelector()
-        self.messages = None
+            if msg:
+                sys.stdout.write("\r" + " " * 80)
+                sys.stdout.write("\r" + msg.decode())
+                sys.stdout.flush()
+                sys.stdout.write(f"\n{username}: ")
+                sys.stdout.flush()
+            else:
+                print("\nServer disconnected, exiting")
+                connection.close()
+                break
 
-    def send_request(self, sock, request):
-        if self.messages:
-            self.messages._send_buffer += self.messages._create_message(
-                content_bytes=self.messages._json_encode(request['content'], 'utf-8'),
-                content_type=request['type'],
-                content_encoding=request['encoding']
-            )
-        else:
-            logger.info("No messages instance found")
+        except Exception as e:
+            print(f'Error handling message from server: {e}')
+            connection.close()
+            break
 
-    def start_connection(self):
-        logger.info("starting connection to"+ str(self.addr))
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        sock.setblocking(False)
-        sock.connect_ex(self.addr)
 
-        events = selectors.EVENT_READ | selectors.EVENT_WRITE
-        self.messages = libclient.Message(self.sel, sock, self.addr, request)
-        self.sel.register(sock, events, data=self.messages)
+def client(host, port, username):
+    room = "default"
 
-        return sock
+    try:
+        # Instantiate socket and start connection with server
+        socket_instance = socket.socket()
+        socket_instance.connect((host, port))
 
-    def create_request(self, action, value):
-        if action in ["register", "message"]:
-            return dict(
-                type="text/json",
-                encoding="utf-8",
-                content=dict(action=action, value=value),
-            )
-        else:
-            return dict(
-                type="binary/custom-client-binary-type",
-                encoding="binary",
-                content=bytes(action + value, encoding="utf-8"),
-            )
+        socket_instance.send(username.encode())
+        time.sleep(0.1)
+        socket_instance.send(room.encode())
 
-if __name__ == '__main__':
+        # Create a thread in order to handle messages sent by server
+        listen_thread = threading.Thread(target=handle_messages, args=[socket_instance])
+        listen_thread.start()
+
+        print("\rConnected to " + host + "\n")
+        print("Use the /help command for a description of options")
+
+        # Main event loop
+        while not exit_signal.is_set():
+            msg = input(username + ": ")
+
+            if msg == '/exit':
+                exit_signal.set() # stop the thread
+                socket_instance.send(msg.encode())
+                socket_instance.close()
+                break
+
+            # Parse message to utf-8
+            socket_instance.send(msg.encode())
+
+    except Exception as e:
+        print(f'Error connecting to server socket, is the server up?')
+    finally:
+        socket_instance.close()
+
+
+if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-i", "--server", help="specify server host")
     parser.add_argument("-p", "--port", help="specify bind port to server")
+    parser.add_argument("-u", "--username", help="specify username")
     parser.add_argument("--log", help="enable debug with --log TRUE")
     args = parser.parse_args()
 
     if not args.server or not args.port:
-        logging.info("usage: server.py -i SERVER -p HOST")
+        logging.info("usage: client.py -i SERVER -p HOST")
         sys.exit(1)
     
     if args.log:
         if args.log.upper() == "TRUE":
             logging.basicConfig(level=logging.DEBUG)
 
-    host, port = args.server, int(args.port)
+    while not args.username or args.username == "":
+        args.username = input("Specify a username for this session: ")
 
-    if handle is None: # the username hasn't been set
-        handle = input("Please set a username: ")
-
-    client = Client(host, port)
-    print(f"Welcome, {handle}")
-
-    request = client.create_request("register", handle) # register username
-    socket_connection = client.start_connection()
-    # client.send_request(socket_connection, request)
-
-    try:
-        while True:
-            events = client.sel.select(timeout=1)
-            for key, mask in events:
-                message = key.data
-                try:
-                    message.process_events(mask)
-                except Exception:
-                    logger.warning(
-                        "main: error: exception for "+
-                        f"{message.addr}:\n{traceback.format_exc()}",
-                    )
-                    message.close()
-
-            if handle:
-                msg = input(f"{handle}: ")
-                if msg.lower() == "exit":
-                    break
-                request = client.create_request("message", msg)
-                client.send_request(socket_connection, request)
-                logger.info("Sending message: "+msg)
-                # Send new messages without reconnecting
-                
-                # client.send_request(socket_connection, request)
-
-    except KeyboardInterrupt:
-        logging.info("caught keyboard interrupt, exiting")
-    finally:
-        client.sel.close()
+    host, port, username = args.server, int(args.port), args.username
+    client(host, port, username)
