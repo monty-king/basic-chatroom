@@ -41,3 +41,8 @@ The client/server protocol is made up of the following:
 * Encryption between client and server
 * Permissions of users delegated to create/remove rooms
 * Some sort of GUI interface
+
+## Retrospective
+For a while, the base code from a programming assignment used was complicated and difficult to maintain.  Moving to a more simple implementation allowed functionality to be built upon it.  The improvement section above gives a good idea of what features would be implemented next.  Overall, I wish I realized to use a simpler code base sooner instead of figuring out the old one, as most of the time spent was troubleshooting rather than adding features.  
+
+I have a refined understanding of how the basics work in python to add the layers of complexity found in the original code base to the current code.
