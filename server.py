@@ -13,7 +13,6 @@ user_rooms = {}
 rooms = ["default"]
 
 def handle_user_connection(connection, address):
-    # connection.send("Please enter a username: ".encode())
     username = connection.recv(2048).decode().strip()
     handles[connection] = username
     room = connection.recv(2048).decode().strip()
@@ -24,6 +23,7 @@ def handle_user_connection(connection, address):
     connection.send(("\n\nYou are currently in room " + room).encode())
 
     print(username + " (" + address[0] + ") has joined")
+    broadcast(username + " has joined", connection)
 
     while True:
         try:
@@ -34,6 +34,7 @@ def handle_user_connection(connection, address):
 
                 if msg.decode() == "/exit":
                     print(username + " (" + address[0] + ") has left")
+                    broadcast(username + " has exited", connection)
                     send("\nGoodbye\n", connection)
                     remove(connection)
                     break
