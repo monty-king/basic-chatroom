@@ -34,7 +34,7 @@ def handle_user_connection(connection, address):
 
                 if msg.decode() == "/exit":
                     print(username + " (" + address[0] + ") has left")
-                    broadcast(username + " has exited", connection)
+                    broadcast(username + " has left the chat", connection)
                     send("\nGoodbye\n", connection)
                     remove(connection)
                     break
@@ -58,6 +58,7 @@ def handle_user_connection(connection, address):
             break
 
 def parse_user_command(command, client_conn):
+    username = handles.get(client_conn)
     try:
         cmd = command[1:command.index(" ")]
     except ValueError:
@@ -81,6 +82,8 @@ def parse_user_command(command, client_conn):
         try:
             target_room = command.split(" ", 1)[1].strip()
             if target_room in rooms:
+                broadcast(username + " has left the chat", client_conn)
+                print('asdf')
                 current_room = user_rooms.get(client_conn)
                 user_rooms[client_conn] = target_room
                 send("\nYou have joined room " + target_room + "\n", client_conn)
