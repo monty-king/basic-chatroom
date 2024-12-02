@@ -47,7 +47,7 @@ def client(host, port, username):
         listen_thread = threading.Thread(target=handle_messages, args=[socket_instance])
         listen_thread.start()
 
-        print("\nConnected to " + host + "\n")
+        print("\rConnected to " + host + "\n")
 
         # Main event loop
         while not exit_signal.is_set():
