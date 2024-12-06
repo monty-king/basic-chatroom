@@ -20,8 +20,9 @@ def handle_user_connection(connection, address):
         room = "default"
 
     user_rooms[connection] = room
-    connection.send(("\n\nYou are currently in room " + room).encode())
+    connection.send(("\nYou are currently in room " + room).encode())
 
+    logger.info(str(username) + " (" + str(address[0]) + ") has joined")
     print(username + " (" + address[0] + ") has joined")
     broadcast(username + " has joined", connection)
 
@@ -33,6 +34,7 @@ def handle_user_connection(connection, address):
             if msg:
 
                 if msg.decode() == "/exit":
+                    logger.info(str(username) + " (" + str(address[0]) + ") has left")
                     print(username + " (" + address[0] + ") has left")
                     broadcast(username + " has left the chat", connection)
                     send("\nGoodbye\n", connection)
@@ -53,6 +55,7 @@ def handle_user_connection(connection, address):
                 break
 
         except Exception as e:
+            logger.info(f'Error handling user connection: {e}')
             print(f'Error handling user connection: {e}')
             remove(connection)
             break
@@ -149,7 +152,8 @@ def broadcast(message, connection):
 
             # Client disconnected
             except Exception as e:
-                print('Error broadcasting message: {e}')
+                logger.info(f'Error broadcasting message: {e}')
+                print(f'Error broadcasting message: {e}')
                 remove(client_conn)
 
 def send(message, connection):
@@ -174,7 +178,8 @@ def server():
         lsock.bind((host, port))
         lsock.listen()
 
-        print("listening on", (host, port))
+        logger.info("listening on: (" + str(host) +", " + str(port) + ")")
+        print("listening on: ", (host, port))
         
         while True:
             # Accept client connection
@@ -185,6 +190,7 @@ def server():
             threading.Thread(target=handle_user_connection, args=[socket_connection, address,]).start()
 
     except Exception as e:
+        logger.info(f'An error has occurred when instancing socket: {e}')
         print(f'An error has occurred when instancing socket: {e}')
     finally:
         # In case of any problem clean all connections and close the server connection
@@ -206,7 +212,8 @@ if __name__ == "__main__":
     
     if args.log:
         if args.log.upper() == "TRUE":
-            logging.basicConfig(level=logging.DEBUG)
+            logging.basicConfig(filename="game.log", format='%(asctime)s %(message)s', filemode='w')
+            logger.setLevel(logging.DEBUG)
 
     host, port = "0.0.0.0", int(args.port)
     server()
