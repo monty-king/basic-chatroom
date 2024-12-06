@@ -14,7 +14,7 @@ To start the chatroom:
 
 Other options:
 1. To see the full list of options, use the runtime /help option
-2. Enable debug mode by passing --log true as a command line argument
+2. To enable logging and debug mode for the server by passing --log true as a command line argument
 3. To set username when joining, pass -u USERNAME
 
 ## Options
@@ -35,7 +35,7 @@ The client/server protocol is made up of the following:
 * text converted to UTF8 bytes array
 
 ## Known Issues
-* Thread issues of console output on the client side, shouldn't impact functionality
+* Thread issues of console output on the client side, however this shouldn't impact functionality
 
 ## Improvements
 * Ability to see what users are in current room
@@ -47,3 +47,5 @@ The client/server protocol is made up of the following:
 For a while, the base code from a programming assignment used was complicated and difficult to maintain.  Moving to a more simple implementation allowed functionality to be built upon it.  The improvement section above gives a good idea of what features would be implemented next.  Overall, I wish I realized to use a simpler code base sooner instead of figuring out the old one, as most of the time spent was troubleshooting rather than adding features.  
 
 I have a refined understanding of how the basics work in python to add the layers of complexity found in the original code base to the current code.
+
+I learned that sometimes the easy solution is the best one to start with instead of starting with something "harder" and trimming it to fit the needs of the work we are doing. This change allowed for more progress to be made, as mentioned above. Overall, it turned out well, even with the bumps we hit along the way.
