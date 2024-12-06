@@ -15,7 +15,6 @@ def handle_messages(connection):
             msg = connection.recv(2048)
 
             if msg:
-                sys.stdout.write("\r" + " " * 80)
                 sys.stdout.write("\r" + msg.decode())
                 sys.stdout.flush()
                 sys.stdout.write(f"\n{username}: ")
@@ -48,7 +47,7 @@ def client(host, port, username):
         listen_thread.start()
 
         print("\rConnected to " + host + "\n")
-        print("Use the /help command for a description of options")
+        print("Use the /help command for a description of options\n")
 
         # Main event loop
         while not exit_signal.is_set():

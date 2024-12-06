@@ -20,9 +20,10 @@ def handle_user_connection(connection, address):
         room = "default"
 
     user_rooms[connection] = room
-    connection.send(("\n\nYou are currently in room " + room).encode())
+    connection.send(("\nYou are currently in room " + room).encode())
 
     logger.info(str(username) + " (" + str(address[0]) + ") has joined")
+    print(username + " (" + address[0] + ") has joined")
     broadcast(username + " has joined", connection)
 
     while True:
@@ -34,6 +35,7 @@ def handle_user_connection(connection, address):
 
                 if msg.decode() == "/exit":
                     logger.info(str(username) + " (" + str(address[0]) + ") has left")
+                    print(username + " (" + address[0] + ") has left")
                     broadcast(username + " has left the chat", connection)
                     send("\nGoodbye\n", connection)
                     remove(connection)
@@ -54,6 +56,7 @@ def handle_user_connection(connection, address):
 
         except Exception as e:
             logger.info(f'Error handling user connection: {e}')
+            print(f'Error handling user connection: {e}')
             remove(connection)
             break
 
@@ -150,6 +153,7 @@ def broadcast(message, connection):
             # Client disconnected
             except Exception as e:
                 logger.info(f'Error broadcasting message: {e}')
+                print(f'Error broadcasting message: {e}')
                 remove(client_conn)
 
 def send(message, connection):
@@ -175,6 +179,7 @@ def server():
         lsock.listen()
 
         logger.info("listening on" + str(host) + str(port))
+        print("listening on", (host, port))
         
         while True:
             # Accept client connection
@@ -186,6 +191,7 @@ def server():
 
     except Exception as e:
         logger.info(f'An error has occurred when instancing socket: {e}')
+        print(f'An error has occurred when instancing socket: {e}')
     finally:
         # In case of any problem clean all connections and close the server connection
         if len(connections) > 0:
