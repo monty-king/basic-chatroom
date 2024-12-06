@@ -178,7 +178,7 @@ def server():
         lsock.bind((host, port))
         lsock.listen()
 
-        logger.info("listening on: " + str(host) + str(port))
+        logger.info("listening on: (" + str(host) +", " + str(port) + ")")
         print("listening on: ", (host, port))
         
         while True:
